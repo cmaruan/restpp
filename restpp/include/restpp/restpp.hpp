@@ -75,6 +75,7 @@ public:
         matcher m;
         if (m.parse(location)) {
             auto& e = m_compiled_matches.emplace_back(m, endpoint{});
+            e.second.register_method_handler(http_method, std::move(handler));
         } else {
             auto& e = m_endpoints[location];
             e.register_method_handler(http_method, std::move(handler));
@@ -114,7 +115,7 @@ public:
 
 private:
     std::unordered_map<std::string, endpoint> m_endpoints;
-    std::vector<std::tuple<matcher, endpoint>> m_compiled_matches;
+    std::vector<std::pair<matcher, endpoint>> m_compiled_matches;
     std::unordered_map<std::string, handler_type> m_handlers;
 };
 
