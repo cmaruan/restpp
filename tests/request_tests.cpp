@@ -1,7 +1,7 @@
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
-#include "restpp/restpp.hpp"
+#include "restpp/http.hpp"
 
 #include <string_view>
 
@@ -29,6 +29,15 @@ TEST_CASE("Parsing HTTP Request") {
         REQUIRE_EQ(req.GET("areYouGood"), "Yes");
         REQUIRE_FALSE(req.GET("notAVariable"));
     }
+    SUBCASE("POST without body") {
+        auto req_text =
+                "POST /foo HTTP/1.1\r\n"
+                "\r\n"sv;
+        auto req = request{req_text};
+        REQUIRE_EQ(req.method(), "POST");
+        REQUIRE_EQ(req.path(), "/foo");
+    }
+
 }
 
 TEST_CASE("Parsing HTTP Request with complex path") {
@@ -61,8 +70,6 @@ TEST_CASE("Parsing HTTP Request with headers") {
 }
 
 
-
-(~py) ➜  .ssh git clone git@.com:cmaruan/django-inventory.git
 
 
 

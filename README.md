@@ -6,7 +6,6 @@ The code itself should be simple and the complexity whould be in the hidden obje
 managed by the library.
 
 
-
 ### Compiling
 
 You will need conan and cmake to build this project

@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 17)
 
 list(APPEND UNITTESTS
-    restpp_tests.cpp
+        request_tests.cpp
+        endpoint_tests.cpp
 )
 
 find_package(doctest REQUIRED)
