@@ -21,15 +21,19 @@ public:
     bool parse(const std::string& exp) {
         auto start = exp.find_first_of('{');
         auto end = exp.find_first_of('}');
-        if (start == std::string::npos || end == std::string::npos || end <= start) {
+        if (start == std::string::npos || end == std::string::npos || (end - start) < 1) {
             return false;
         }
         auto sep = exp.find(':', start);
-        if (sep == std::string::npos || exp.find(':', sep + 1) != std::string::npos) {
+        if (sep == std::string::npos) {
+            m_name = exp.substr(start + 1, end - start - 1);
+            m_type = "str";
+        } else if (exp.find(':', sep + 1) != std::string::npos) {
+            // bad format: too many ':' symbols
             return false;
+        } else {
+            m_type = exp.substr(sep + 1, end - sep - 1);
         }
-        m_type = exp.substr(start + 1, sep - start - 1);
-        m_name = exp.substr(sep + 1, end - sep - 1);
         return true;
     }
     bool match(const std::string& value) {
@@ -82,9 +86,10 @@ public:
         }
     }
 
-    void add_resource(const std::string& name, const std::function<void(endpoint& e)>& callback) {
+    template <typename Resource>
+    void add_resource(const std::string& name) {
         auto& e = m_endpoints[name];
-        callback(e);
+        Resource::config(e);
     }
     std::shared_ptr<response> handle_request(std::shared_ptr<request> r) {
         if (r->empty_path()) {
@@ -93,7 +98,7 @@ public:
                 return it->second(r);
             }
             auto res = std::make_shared<response>();
-            res->code(http_code::http_405_not_allowed);
+            res->code(http_code::http_405_method_not_allowed);
             return res;
         }
 
@@ -103,14 +108,12 @@ public:
         }
         for (auto& [m, handler]: m_compiled_matches) {
             if (m.match(path)) {
-                r->add_variable(m.name(), m.raw_value());
+                r->set_argument(m.name(), m.raw_value());
                 return handler.handle_request(r);
             }
         }
 
-        auto res = std::make_shared<response>();
-        res->code(http_code::http_404_not_found);
-        return res;
+        return std::make_shared<response>(http_code::http_404_not_found);
     }
 
 private:

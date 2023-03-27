@@ -16,12 +16,74 @@
 namespace restpp {
 
 enum class http_code {
+    http_100_continue = 100,
+    http_101_switching_protocols = 101,
+    http_102_processing = 102,
+    http_103_early_hints = 103,
+    http_200_ok = 200,
+    http_201_created = 201,
+    http_202_accepted = 202,
+    http_203_non_authoritative_information = 203,
+    http_204_no_content = 204,
+    http_205_reset_content = 205,
+    http_206_partial_content = 206,
+    http_207_multi_status = 207,
+    http_208_already_reported = 208,
+    http_226_im_used = 226,
+    http_300_multiple_choices = 300,
+    http_301_moved_permanently = 301,
+    http_302_found = 302,
+    http_303_see_other = 303,
+    http_304_not_modified = 304,
+    http_307_temporary_redirect = 307,
+    http_308_permanent_redirect = 308,
+    http_400_bad_request = 400,
+    http_401_unauthorized = 401,
+    http_402_payment_required = 402,
+    http_403_forbidden = 403,
     http_404_not_found = 404,
-    http_405_not_allowed = 405,
+    http_405_method_not_allowed = 405,
+    http_406_not_acceptable = 406,
+    http_407_proxy_authentication_required = 407,
+    http_408_request_timeout = 408,
+    http_409_conflict = 409,
+    http_410_gone = 410,
+    http_411_length_required = 411,
+    http_412_precondition_failed = 412,
+    http_413_content_too_large = 413,
+    http_414_uri_too_long = 414,
+    http_415_unsupported_media_type = 415,
+    http_416_range_not_satisfiable = 416,
+    http_417_expectation_failed = 417,
+    http_418_I_am_a_teapot = 418,
+    http_421_misdirected_request = 421,
+    http_422_unprocessable_content = 422,
+    http_423_locked = 423,
+    http_424_failed_dependency = 424,
+    http_425_too_early = 425,
+    http_426_upgrade_required = 426,
+    http_428_precondition_required = 428,
+    http_429_too_many_requests = 429,
+    http_431_request_header_fields_too_large = 431,
+    http_451_unavailable_for_legal_reasons = 451,
+    http_500_internal_server_error = 500,
+    http_501_not_implemented = 501,
+    http_502_bad_gateway = 502,
+    http_503_service_unavailable = 503,
+    http_504_gateway_timeout = 504,
+    http_505_http_version_not_supported = 505,
+    http_506_variant_also_negotiates = 506,
+    http_507_insufficient_storage = 507,
+    http_508_loop_detected = 508,
+    http_510_not_extended = 510,
+    http_511_network_authentication_required = 511,
+
 };
 
 class response {
 public:
+    response() = default;
+    explicit response(http_code code) : m_code{code} {}
     http_code code() const {
         return m_code;
     }
@@ -46,8 +108,12 @@ public:
     [[nodiscard]] std::string_view method() const { return m_method; }
     [[nodiscard]] std::string_view path() const { return m_path; }
     [[nodiscard]] std::string_view full_path() const { return m_full_path; }
-    [[nodiscard]] std::string_view get_variable(std::string_view variable) const {
-        return m_vars.at(variable);
+    [[nodiscard]] std::string_view get_argument(std::string_view variable) const {
+        return m_arguments.at(variable);
+    }
+
+    void set_argument(const std::string& name, const std::string& value) {
+        m_arguments[name] = value;
     }
 
     std::optional<std::string_view> GET(std::string_view variable) {
@@ -76,9 +142,7 @@ public:
         return part;
     }
 
-    void add_variable(const std::string& name, const std::string& value) {
-        m_vars[name] = value;
-    }
+
 
     [[nodiscard]] bool empty_path() const {
         return m_path_parts.empty();
@@ -179,7 +243,7 @@ private:
     std::string_view m_full_path;
     std::string m_raw_text;
     std::deque<std::string_view> m_path_parts;
-    std::unordered_map<std::string_view, std::string_view> m_vars;
+    std::unordered_map<std::string_view, std::string_view> m_arguments;
     std::unordered_map<std::string_view, std::string_view> m_get_variables;
     std::unordered_map<std::string_view, std::string_view> m_headers;
 };
