@@ -83,15 +83,25 @@ enum class http_code {
 class response {
 public:
     response() = default;
-    explicit response(http_code code) : m_code{code} {}
-    http_code code() const {
+    response(http_code code, std::string text)
+            : m_code{code}, m_text{std::move(text)} { }
+
+    explicit response(std::string text) : response(http_code::http_200_ok, std::move(text)) {}
+
+    [[nodiscard]] http_code code() const {
         return m_code;
     }
     void code(http_code code) { m_code = code; }
 
+    [[nodiscard]] const std::string& text() const { return m_text; }
+    void text(std::string text) { m_text = std::move(text); }
+
 private:
     http_code m_code;
+    std::string m_text;
 };
+
+
 
 class request {
 public:

@@ -26,12 +26,15 @@ public:
         }
         auto sep = exp.find(':', start);
         if (sep == std::string::npos) {
+            // non-typed argument defaults to a string match
             m_name = exp.substr(start + 1, end - start - 1);
             m_type = "str";
         } else if (exp.find(':', sep + 1) != std::string::npos) {
             // bad format: too many ':' symbols
             return false;
         } else {
+            // Type and name is provided
+            m_name = exp.substr(start + 1, sep - start - 1);
             m_type = exp.substr(sep + 1, end - sep - 1);
         }
         return true;
@@ -113,7 +116,7 @@ public:
             }
         }
 
-        return std::make_shared<response>(http_code::http_404_not_found);
+        return std::make_shared<response>(http_code::http_404_not_found, "Not Found");
     }
 
 private:
